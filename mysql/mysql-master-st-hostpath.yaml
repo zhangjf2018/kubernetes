@@ -1,0 +1,41 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+ name: mysql-master
+ labels:
+  name: mysql-master
+spec:
+  serviceName: mysql-master
+  replicas: 1
+  template:
+   metadata:
+    labels:
+     name: mysql-master
+   spec:
+    nodeSelector:
+      mysql: master2
+    containers:
+    - name: mysql-master
+      image: registry:5000/mysql-master:5.7
+      volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: mysql-master-data
+        - name: mysql-config
+          mountPath: /etc/mysql/mysql.conf.d/mysqld.cnf
+          subPath: mysqld.cnf
+      ports:
+      - containerPort: 3306
+      env:
+      - name: MYSQL_ROOT_PASSWORD
+        value: "12345678"
+      - name: MYSQL_REPLICATION_USER
+        value: "repl"
+      - name: MYSQL_REPLICAITON_PASSWORD
+        value: "12345678"
+    volumes:
+     - name: mysql-master-data
+       hostPath:
+        path: /data/mysql_data
+     - name: mysql-config
+       configMap:
+        name: mysql-master-config

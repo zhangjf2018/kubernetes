@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: centos
+  namespace: default
+spec:
+  hostname: centos
+  subdomain: default
+  nodeSelector:
+      centos: centos7.5
+  containers:
+  - image: registry:5000/centos:7.5
+    command:
+      - sleep
+      - "36000000"
+    name: centos

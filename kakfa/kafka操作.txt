@@ -1,0 +1,40 @@
+bin/kafka-topics.sh  --delete --zookeeper 175.10.100.170:12181,175.10.100.13:12181,175.10.100.14:12181 --topic kstt
+
+
+bin/kafka-topics.sh --create --zookeeper 175.10.100.170:12181,175.10.100.13:12181,175.10.100.14:12181 --replication-factor 3 --partitions 2 --topic kstt
+
+bin/kafka-console-producer.sh --broker-list 175.10.100.13:19092 --topic kstt
+
+
+bin/kafka-topics.sh --list --zookeeper localhost:12181 --topic kstt
+
+
+
+bin/kafka-consumer-groups.sh --bootstrap-server 175.10.100.13:19092 --describe --group kstt_group
+
+
+
+bin/kafka-topics.sh --zookeeper 175.10.100.170:12181,175.10.100.13:12181,175.10.100.14:12181 --describe kstt
+
+bin/kafka-topics.sh --zookeeper 175.10.100.170:12181,175.10.100.13:12181,175.10.100.14:12181 --describe --topic kstt
+
+
+5643316  5638257  5060
+
+
+5594492  5589554  4939
+
+
+kafka-console-producer.sh --broker-list [kafka的service的clusterIP]:9092 --topic test
+
+kafka-console-producer.sh --broker-list kafka-service:9092 --topic test
+
+kafka-console-consumer.sh --bootstrap-server [kafka的service的clusterIP]:9092 --topic test --from-beginning
+
+kafka-console-consumer.sh --bootstrap-server kafka-service-2:9092 --topic test --from-beginning
+
+kafka-topics.sh --list --zookeeper [zookeeper的service的clusterIP]:2181
+
+for i in 0 1 2; do kubectl exec zk-$i zkServer.sh status; done
+
+

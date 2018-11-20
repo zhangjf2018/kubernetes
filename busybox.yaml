@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox
+  namespace: default
+spec:
+  hostname: busybox-1
+  subdomain: default
+  containers:
+  - image: registry:5000/busybox:1.0
+    command:
+      - sleep
+      - "360000"
+    name: busybox

@@ -1,0 +1,58 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: tf-dsf-train
+  name: ps0
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ps0
+        role: ps
+    spec:
+      containers:
+      - name: ps0
+        image: registry:5000/tensorflow:1.6.0.1
+        ports:
+        - containerPort: 2222
+        env:
+        - name: PS_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: tf-cluster-config
+              key: ps
+        - name: WORKER_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: tf-cluster-config
+              key: worker
+        command: ["/bin/sh", "-c"]
+        args: ["
+            curl http://192.168.44.144:8088/distribute.py -o /data/distribute.py;
+            python /data/distribute.py \
+                   --ps_hosts=$(PS_HOSTS) \
+                   --worker_hosts=$(WORKER_HOSTS) \
+                   --job_name=ps \
+                   --task_index=0 ;"]
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      volumes:
+        - name: data
+          hostPath:
+            path: /data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: tf-dsf-train
+  labels:
+    name: tf-ps0-service
+  name: ps0
+spec:
+  selector:
+    app: ps0
+  ports:
+  - port: 2222
+    targetPort: 2222

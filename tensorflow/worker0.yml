@@ -1,0 +1,60 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: tf-dsf-train
+  name: worker0
+spec:
+  template:
+    metadata:
+      labels:
+        app: worker0
+        role: worker
+    spec:
+      containers:
+      - name: worker0
+        image: registry:5000/tensorflow:1.6.0.1
+        ports:
+        - containerPort: 2222
+        env:
+        - name: PS_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: tf-cluster-config
+              key: ps
+        - name: WORKER_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: tf-cluster-config
+              key: worker
+        command: ["/bin/sh", "-c"]
+        args: ["
+            curl http://192.168.44.144:8088/distribute.py -o /data/distribute.py;
+            python /data/distribute.py \
+                   --ps_hosts=$(PS_HOSTS) \
+                   --worker_hosts=$(WORKER_HOSTS) \
+                   --job_name=worker \
+                   --task_index=0 ;
+            echo 'Train done...';"]
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      restartPolicy: Never
+      volumes:
+        - name: data
+          hostPath:
+            path: /data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: tf-dsf-train
+  labels:
+    name: tf-worker0-service
+  name: worker0
+spec:
+  selector:
+    app: worker0
+  ports:
+  - port: 2222
+    targetPort: 2222
